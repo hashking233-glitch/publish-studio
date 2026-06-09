@@ -41,6 +41,11 @@ button {
   display: grid;
   grid-template-columns: 260px minmax(380px, 500px) 1fr;
   height: 100vh;
+  transition: grid-template-columns 0.18s ease;
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 72px minmax(380px, 500px) 1fr;
 }
 
 .library-panel,
@@ -59,6 +64,7 @@ button {
   background: #111827;
 }
 
+.brand-row,
 .brand,
 .library-actions,
 .library-head,
@@ -72,8 +78,14 @@ button {
   align-items: center;
 }
 
+.brand-row {
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .brand {
   gap: 12px;
+  min-width: 0;
 }
 
 .brand-mark {
@@ -99,6 +111,10 @@ button {
   font-size: 19px;
 }
 
+.brand-copy {
+  min-width: 0;
+}
+
 .brand p,
 .preview-top p {
   margin: 6px 0 0;
@@ -115,8 +131,69 @@ button {
   gap: 8px;
 }
 
-.library-actions .primary-button {
-  flex: 1;
+.action-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 40px;
+  gap: 8px;
+}
+
+.copy-action {
+  width: 40px;
+  min-height: 34px;
+}
+
+.action-strip .compact-action {
+  min-height: 34px;
+  padding: 0 8px;
+}
+
+.action-strip .secondary-button {
+  border: 1px solid var(--line);
+  color: #111827;
+  background: #ffffff;
+}
+
+.sidebar-toggle {
+  flex: 0 0 auto;
+  width: 34px;
+  min-height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.sidebar-toggle:hover,
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.app-shell.sidebar-collapsed .library-panel {
+  gap: 14px;
+  padding: 16px 10px;
+  overflow: hidden;
+}
+
+.app-shell.sidebar-collapsed .brand-row {
+  display: grid;
+  justify-items: center;
+}
+
+.app-shell.sidebar-collapsed .brand {
+  justify-content: center;
+}
+
+.app-shell.sidebar-collapsed .brand-copy,
+.app-shell.sidebar-collapsed .action-strip,
+.app-shell.sidebar-collapsed .library-head,
+.app-shell.sidebar-collapsed .doc-list {
+  display: none;
+}
+
+.app-shell.sidebar-collapsed .sidebar-toggle {
+  width: 42px;
 }
 
 .library-head {
@@ -215,7 +292,8 @@ button {
 
 .avatar-picker input,
 .file-tool input,
-.file-import input {
+.file-import input,
+.hidden-file-input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -253,7 +331,7 @@ button {
 
 .toolbar {
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
 }
 
 .tool-button,
@@ -275,6 +353,19 @@ button {
   border: 1px solid var(--line);
   color: var(--ink);
   background: var(--soft);
+}
+
+.toolbar .tool-button {
+  width: 28px;
+}
+
+.toolbar .select-control {
+  flex: 0 0 118px;
+  width: 118px;
+  height: 34px;
+  margin-left: auto;
+  padding: 0 8px;
+  font-size: 13px;
 }
 
 .profile-tool {
@@ -306,7 +397,7 @@ button {
   left: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(3, 30px);
+  grid-template-columns: repeat(3, 28px);
   gap: 4px;
   padding: 6px;
   border: 1px solid var(--line);
@@ -442,7 +533,7 @@ button {
 
 .image-strip {
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   flex: 0 0 auto;
   gap: 8px;
   min-height: 0;
@@ -468,6 +559,31 @@ button {
   font-weight: 850;
 }
 
+.material-actions {
+  display: grid;
+  flex: 0 0 96px;
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+  height: 68px;
+  min-height: 68px;
+}
+
+.material-action-button {
+  min-height: 0;
+  padding: 0 8px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  color: var(--muted);
+  background: #ffffff;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.material-action-button:hover {
+  color: var(--ink);
+  border-color: #b8c5d6;
+}
+
 .image-chip {
   position: relative;
   display: grid;
@@ -476,6 +592,7 @@ button {
   align-items: center;
   flex: 0 0 auto;
   width: 226px;
+  height: 68px;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -492,6 +609,15 @@ button {
   background: #ffffff;
   font-size: 12px;
   font-weight: 850;
+}
+
+.material-actions .image-clear-button {
+  flex: initial;
+  min-height: 0;
+  padding: 0 8px;
+  border-style: dashed;
+  color: var(--muted);
+  font-size: 12px;
 }
 
 .image-chip-remove {
@@ -729,6 +855,10 @@ button {
     grid-template-columns: 220px 1fr;
     height: auto;
     min-height: 100vh;
+  }
+
+  .app-shell.sidebar-collapsed {
+    grid-template-columns: 72px 1fr;
   }
 
   .preview-panel {

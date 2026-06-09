@@ -3,14 +3,17 @@ const CANVAS_HEIGHT = 1152;
 const PAD_X = 46;
 const STORE_KEY = "fawenStudio.docs.v1";
 const ACTIVE_KEY = "fawenStudio.activeDoc.v1";
+const SIDEBAR_KEY = "fawenStudio.sidebarCollapsed.v1";
 
 const $ = (selector) => document.querySelector(selector);
 
 const els = {
+  appShell: $("#appShell"),
   docList: $("#docList"),
   docCount: $("#docCount"),
   newDoc: $("#newDocBtn"),
   duplicateDoc: $("#duplicateDocBtn"),
+  sidebarToggle: $("#sidebarToggleBtn"),
   exportDocs: $("#exportDocsBtn"),
   importDocs: $("#importDocsInput"),
   deleteDoc: $("#deleteDocBtn"),
@@ -807,12 +810,22 @@ function updateImageStrip() {
     return;
   }
 
+  const materialActions = document.createElement("div");
+  materialActions.className = "material-actions";
+
+  const uploadButton = document.createElement("button");
+  uploadButton.className = "material-action-button";
+  uploadButton.type = "button";
+  uploadButton.textContent = "上传素材";
+  uploadButton.addEventListener("click", () => els.imageInput.click());
+
   const clearButton = document.createElement("button");
-  clearButton.className = "image-clear-button";
+  clearButton.className = "material-action-button image-clear-button";
   clearButton.type = "button";
   clearButton.textContent = "清空素材";
   clearButton.addEventListener("click", clearImages);
-  els.imageStrip.append(clearButton);
+  materialActions.append(uploadButton, clearButton);
+  els.imageStrip.append(materialActions);
 
   images.forEach((image) => {
     const chip = document.createElement("div");
@@ -2365,9 +2378,22 @@ async function copyRichText() {
   els.status.textContent = ok ? "富文本已复制；公众号可直接粘贴，X 图片可能需要手动上传" : "复制失败，请重试";
 }
 
+function setSidebarCollapsed(collapsed) {
+  if (!els.appShell || !els.sidebarToggle) return;
+  els.appShell.classList.toggle("sidebar-collapsed", collapsed);
+  els.sidebarToggle.textContent = collapsed ? "›" : "‹";
+  els.sidebarToggle.title = collapsed ? "展开侧边栏" : "折叠侧边栏";
+  els.sidebarToggle.setAttribute("aria-label", collapsed ? "展开侧边栏" : "折叠侧边栏");
+  els.sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+  localStorage.setItem(SIDEBAR_KEY, collapsed ? "1" : "0");
+}
+
 function bindEvents() {
   els.newDoc.addEventListener("click", createDoc);
   els.duplicateDoc.addEventListener("click", duplicateDoc);
+  els.sidebarToggle.addEventListener("click", () => {
+    setSidebarCollapsed(!els.appShell.classList.contains("sidebar-collapsed"));
+  });
   els.exportDocs.addEventListener("click", exportDocuments);
   els.importDocs.addEventListener("change", importDocuments);
   els.deleteDoc.addEventListener("click", deleteDoc);
@@ -2456,6 +2482,7 @@ function bindEvents() {
 }
 
 bindEvents();
+setSidebarCollapsed(localStorage.getItem(SIDEBAR_KEY) === "1");
 loadDocToForm();
 renderDocList();
 pushHistoryNow();
