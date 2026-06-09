@@ -160,24 +160,43 @@ button {
 
 .sidebar-toggle {
   position: absolute;
-  top: 12px;
-  right: 0;
+  top: 10px;
+  right: -2px;
   flex: 0 0 auto;
-  width: 32px;
-  min-height: 32px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  color: #f8fafc;
-  background: rgba(255, 255, 255, 0.1);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  font-size: 20px;
-  font-weight: 900;
-  line-height: 1;
+  width: 36px;
+  min-height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #9aa8bd;
+  background: transparent;
 }
 
-.sidebar-toggle:hover,
+.sidebar-toggle:hover {
+  color: #f8fafc;
+  background: transparent;
+}
+
 .icon-button:hover {
   background: rgba(255, 255, 255, 0.14);
+}
+
+.sidebar-chevrons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  transform: translateX(3px);
+}
+
+.sidebar-chevrons span {
+  width: 12px;
+  height: 12px;
+  margin-left: -4px;
+  border-left: 3px solid currentColor;
+  border-bottom: 3px solid currentColor;
+  border-radius: 1px;
+  transform: rotate(45deg);
 }
 
 .app-shell.sidebar-collapsed .library-panel {
@@ -205,6 +224,14 @@ button {
 .app-shell.sidebar-collapsed .sidebar-toggle {
   position: static;
   width: 42px;
+}
+
+.app-shell.sidebar-collapsed .sidebar-chevrons {
+  transform: translateX(-1px);
+}
+
+.app-shell.sidebar-collapsed .sidebar-chevrons span {
+  transform: rotate(225deg);
 }
 
 .library-head {

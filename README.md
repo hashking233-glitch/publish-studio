@@ -9,7 +9,7 @@
 部署到 GitHub Pages 后可直接访问：
 
 ```text
-https://hashking233-glitch.github.io/publish-studio/
+https://nana-ai-diary.github.io/publish-studio/
 ```
 
 也可以本地打开 `index.html`，或启动一个本地服务：

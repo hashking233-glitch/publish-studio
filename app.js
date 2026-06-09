@@ -2396,7 +2396,6 @@ async function copyRichText() {
 function setSidebarCollapsed(collapsed) {
   if (!els.appShell || !els.sidebarToggle) return;
   els.appShell.classList.toggle("sidebar-collapsed", collapsed);
-  els.sidebarToggle.textContent = collapsed ? "›" : "‹";
   els.sidebarToggle.title = collapsed ? "展开侧边栏" : "折叠侧边栏";
   els.sidebarToggle.setAttribute("aria-label", collapsed ? "展开侧边栏" : "折叠侧边栏");
   els.sidebarToggle.setAttribute("aria-expanded", String(!collapsed));
