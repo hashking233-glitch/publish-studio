@@ -4,6 +4,7 @@ const PAD_X = 46;
 const STORE_KEY = "publishStudio.docs.v1";
 const ACTIVE_KEY = "publishStudio.activeDoc.v1";
 const SIDEBAR_KEY = "publishStudio.sidebarCollapsed.v1";
+const PREVIEW_MODE_KEY = "publishStudio.previewMode.v1";
 const LEGACY_STORE_KEY = "fawenStudio.docs.v1";
 const LEGACY_ACTIVE_KEY = "fawenStudio.activeDoc.v1";
 const LEGACY_SIDEBAR_KEY = "fawenStudio.sidebarCollapsed.v1";
@@ -37,6 +38,9 @@ const els = {
   lineHeight: $("#lineHeightInput"),
   content: $("#contentInput"),
   pages: $("#pages"),
+  articlePreview: $("#articlePreview"),
+  cardMode: $("#cardModeBtn"),
+  articleMode: $("#articleModeBtn"),
   status: $("#statusText"),
   copyRich: $("#copyRichBtn"),
   downloadLong: $("#downloadLongBtn"),
@@ -70,6 +74,7 @@ let renderTimer = null;
 let storageLimited = false;
 let historyTimer = null;
 let historyRestoring = false;
+let previewMode = localStorage.getItem(PREVIEW_MODE_KEY) === "article" ? "article" : "card";
 const undoStack = [];
 let textSelection = { start: 0, end: 0 };
 
@@ -2138,11 +2143,21 @@ async function render() {
   for (let i = 0; i < pages.length; i += 1) {
     canvases.push(await drawPage(pages[i], i, pages.length, doc));
   }
-  drawPreview();
+  await drawPreview();
   els.status.textContent = storageLimited ? `已生成 ${canvases.length} 张图片；图片较大，本次可预览但本地缓存可能不完整` : `已生成 ${canvases.length} 张图片，文档已保存`;
 }
 
-function drawPreview() {
+async function drawPreview() {
+  const isArticle = previewMode === "article";
+  els.pages.classList.toggle("hidden", isArticle);
+  els.articlePreview.classList.toggle("hidden", !isArticle);
+  els.cardMode.classList.toggle("active", !isArticle);
+  els.articleMode.classList.toggle("active", isArticle);
+  if (isArticle) {
+    await drawArticlePreview();
+    return;
+  }
+
   els.pages.innerHTML = "";
   if (!canvases.length) {
     const empty = document.createElement("div");
@@ -2172,6 +2187,19 @@ function drawPreview() {
     shell.append(frame, actions);
     els.pages.append(shell);
   });
+}
+
+async function drawArticlePreview() {
+  syncFormToDoc(false);
+  const doc = activeDoc();
+  const html = await buildRichHtml(doc);
+  els.articlePreview.innerHTML = html || `<div class="empty-state">暂无可预览内容</div>`;
+}
+
+function setPreviewMode(mode) {
+  previewMode = mode === "article" ? "article" : "card";
+  localStorage.setItem(PREVIEW_MODE_KEY, previewMode);
+  drawPreview();
 }
 
 function canvasToBlob(canvas) {
@@ -2417,6 +2445,8 @@ function bindEvents() {
   els.copyRich.addEventListener("click", copyRichText);
   els.downloadLong.addEventListener("click", downloadLongImage);
   els.downloadAll.addEventListener("click", downloadAll);
+  els.cardMode.addEventListener("click", () => setPreviewMode("card"));
+  els.articleMode.addEventListener("click", () => setPreviewMode("article"));
   els.replaceToggle.addEventListener("click", () => {
     els.replacePanel.classList.toggle("hidden");
     if (!els.replacePanel.classList.contains("hidden")) {

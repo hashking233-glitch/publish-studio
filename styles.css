@@ -735,7 +735,35 @@ button {
 }
 
 .preview-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 10px;
+}
+
+.preview-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.mode-button {
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.mode-button.active {
+  color: #ffffff;
+  background: #111827;
 }
 
 .pages {
@@ -787,6 +815,26 @@ button {
   color: var(--muted);
   background: rgba(255, 255, 255, 0.55);
   text-align: center;
+}
+
+.article-preview {
+  max-width: 720px;
+  min-height: calc(100vh - 180px);
+  margin: 0 auto;
+  padding: 42px 52px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: var(--shadow);
+}
+
+.article-preview.hidden,
+.pages.hidden {
+  display: none;
+}
+
+.article-preview section {
+  max-width: 100%;
 }
 
 .modal {

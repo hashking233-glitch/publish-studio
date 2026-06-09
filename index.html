@@ -139,12 +139,17 @@
             <p id="statusText">准备排版</p>
           </div>
           <div class="preview-actions">
+            <div class="preview-mode-switch" aria-label="预览模式">
+              <button id="cardModeBtn" class="mode-button active" type="button" data-preview-mode="card">小红书卡片</button>
+              <button id="articleModeBtn" class="mode-button" type="button" data-preview-mode="article">公众号长文</button>
+            </div>
             <button id="copyRichBtn" class="secondary-button" type="button">复制富文本</button>
             <button id="downloadLongBtn" class="secondary-button" type="button">下载长图</button>
             <button id="downloadAllBtn" class="primary-button" type="button">批量下载</button>
           </div>
         </header>
         <div id="pages" class="pages"></div>
+        <div id="articlePreview" class="article-preview hidden" aria-label="公众号长文预览"></div>
       </section>
     </main>
 
