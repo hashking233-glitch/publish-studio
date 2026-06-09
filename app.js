@@ -1,9 +1,12 @@
 const CANVAS_WIDTH = 864;
 const CANVAS_HEIGHT = 1152;
 const PAD_X = 46;
-const STORE_KEY = "fawenStudio.docs.v1";
-const ACTIVE_KEY = "fawenStudio.activeDoc.v1";
-const SIDEBAR_KEY = "fawenStudio.sidebarCollapsed.v1";
+const STORE_KEY = "publishStudio.docs.v1";
+const ACTIVE_KEY = "publishStudio.activeDoc.v1";
+const SIDEBAR_KEY = "publishStudio.sidebarCollapsed.v1";
+const LEGACY_STORE_KEY = "fawenStudio.docs.v1";
+const LEGACY_ACTIVE_KEY = "fawenStudio.activeDoc.v1";
+const LEGACY_SIDEBAR_KEY = "fawenStudio.sidebarCollapsed.v1";
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -61,7 +64,7 @@ const defaultAuthor = "娜娜酱AI日记";
 const defaultHandle = "@nana_ai_diary";
 
 let docs = loadDocs();
-let activeId = localStorage.getItem(ACTIVE_KEY) || docs[0]?.id;
+let activeId = localStorage.getItem(ACTIVE_KEY) || localStorage.getItem(LEGACY_ACTIVE_KEY) || docs[0]?.id;
 let canvases = [];
 let renderTimer = null;
 let storageLimited = false;
@@ -184,6 +187,16 @@ function loadDocs() {
   try {
     const parsed = JSON.parse(localStorage.getItem(STORE_KEY) || "[]");
     if (Array.isArray(parsed) && parsed.length) return migrateSeedDocs(parsed);
+  } catch {
+    // fall through to seed document
+  }
+  try {
+    const legacy = JSON.parse(localStorage.getItem(LEGACY_STORE_KEY) || "[]");
+    if (Array.isArray(legacy) && legacy.length) {
+      const migrated = migrateSeedDocs(legacy);
+      localStorage.setItem(STORE_KEY, JSON.stringify(migrated));
+      return migrated;
+    }
   } catch {
     // fall through to seed document
   }
@@ -395,6 +408,8 @@ function createDoc() {
   syncFormToDoc(false);
   const doc = defaultDoc();
   doc.title = `新文档 ${docs.length + 1}`;
+  doc.content = "";
+  doc.images = {};
   docs.unshift(doc);
   activeId = doc.id;
   saveDocs();
@@ -444,7 +459,7 @@ function readFileAsText(file) {
 function exportDocuments() {
   syncFormToDoc(false);
   const payload = {
-    app: "fawen-studio",
+    app: "publish-studio",
     version: 1,
     exportedAt: new Date().toISOString(),
     activeId,
@@ -452,7 +467,7 @@ function exportDocuments() {
   };
   const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, "");
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
-  saveBlob(blob, `fawen-studio-backup-${stamp}.json`);
+  saveBlob(blob, `publish-studio-backup-${stamp}.json`);
   els.status.textContent = `已导出 ${docs.length} 篇文档备份`;
 }
 
@@ -2152,7 +2167,7 @@ function drawPreview() {
     button.type = "button";
     button.title = "下载单张";
     button.textContent = "↓";
-    button.addEventListener("click", () => downloadCanvas(canvas, `fawen-page-${String(index + 1).padStart(2, "0")}.png`));
+    button.addEventListener("click", () => downloadCanvas(canvas, `publish-page-${String(index + 1).padStart(2, "0")}.png`));
     actions.append(label, button);
     shell.append(frame, actions);
     els.pages.append(shell);
@@ -2183,23 +2198,23 @@ function saveBlob(blob, filename) {
 async function downloadAll() {
   if (!canvases.length) return;
   if (!window.JSZip) {
-    canvases.forEach((canvas, index) => setTimeout(() => downloadCanvas(canvas, `fawen-page-${index + 1}.png`), index * 160));
+    canvases.forEach((canvas, index) => setTimeout(() => downloadCanvas(canvas, `publish-page-${index + 1}.png`), index * 160));
     return;
   }
   const zip = new JSZip();
   for (const [index, canvas] of canvases.entries()) {
     const blob = await canvasToBlob(canvas);
-    zip.file(`fawen-page-${String(index + 1).padStart(2, "0")}.png`, blob);
+    zip.file(`publish-page-${String(index + 1).padStart(2, "0")}.png`, blob);
   }
   const blob = await zip.generateAsync({ type: "blob", compression: "STORE" });
-  saveBlob(blob, `${activeDoc().title || "fawen"}.zip`);
+  saveBlob(blob, `${activeDoc().title || "publish"}.zip`);
 }
 
 async function downloadLongImage() {
   syncFormToDoc(false);
   els.status.textContent = "正在生成长图...";
   const canvas = await drawLongCanvas(activeDoc());
-  await downloadCanvas(canvas, `${activeDoc().title || "fawen"}-long.png`);
+  await downloadCanvas(canvas, `${activeDoc().title || "publish"}-long.png`);
   els.status.textContent = `已下载长图，尺寸 ${canvas.width}x${canvas.height}`;
 }
 
@@ -2482,7 +2497,7 @@ function bindEvents() {
 }
 
 bindEvents();
-setSidebarCollapsed(localStorage.getItem(SIDEBAR_KEY) === "1");
+setSidebarCollapsed((localStorage.getItem(SIDEBAR_KEY) || localStorage.getItem(LEGACY_SIDEBAR_KEY)) === "1");
 loadDocToForm();
 renderDocList();
 pushHistoryNow();

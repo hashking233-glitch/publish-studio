@@ -1,4 +1,4 @@
-# 发文工作台
+# Publish Studio
 
 一个面向公众号、小红书图文和长文发稿的本地 Markdown 排版工具。
 
@@ -9,7 +9,7 @@
 部署到 GitHub Pages 后可直接访问：
 
 ```text
-https://hashking233-glitch.github.io/fawen-studio/
+https://hashking233-glitch.github.io/publish-studio/
 ```
 
 也可以本地打开 `index.html`，或启动一个本地服务：
@@ -108,7 +108,7 @@ console.log(title);
 
 左侧的“导入”支持：
 
-- `fawen-studio` 导出的 JSON 备份
+- `publish-studio` 导出的 JSON 备份
 - 普通 `.md` / `.txt` 文档
 
 导入采用追加模式，不会清空当前已有文档。
