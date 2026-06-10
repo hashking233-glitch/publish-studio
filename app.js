@@ -27,6 +27,8 @@ const els = {
   title: $("#titleInput"),
   author: $("#authorInput"),
   handle: $("#handleInput"),
+  showProfile: $("#showProfileInput"),
+  showProfileLabel: $("#showProfileLabel"),
   avatarInput: $("#avatarInput"),
   avatarPreview: $("#avatarPreview"),
   imageInput: $("#imageInput"),
@@ -177,6 +179,7 @@ function defaultDoc() {
     author: defaultAuthor,
     handle: defaultHandle,
     avatar: sampleAvatar,
+    showProfile: true,
     settings: {
       textColor: "#202938",
       bgColor: "#ffffff",
@@ -319,6 +322,8 @@ function loadDocToForm() {
   els.title.value = doc.title || "";
   els.author.value = doc.author || "";
   els.handle.value = doc.handle || "";
+  els.showProfile.checked = doc.showProfile !== false;
+  updateProfileToggleLabel();
   els.avatarPreview.src = doc.avatar || sampleAvatar;
   els.textColor.value = doc.settings?.textColor || "#202938";
   els.accentColor.value = doc.settings?.accentColor || "#2563eb";
@@ -336,6 +341,8 @@ function syncFormToDoc(markUpdated = true) {
   doc.title = els.title.value.trim() || "未命名文档";
   doc.author = els.author.value.trim() || "未命名作者";
   doc.handle = normalizeHandle(els.handle.value);
+  doc.showProfile = els.showProfile.checked;
+  updateProfileToggleLabel();
   doc.settings = {
     textColor: els.textColor.value,
     bgColor: doc.settings?.bgColor || "#ffffff",
@@ -349,6 +356,11 @@ function syncFormToDoc(markUpdated = true) {
   if (markUpdated) doc.updatedAt = Date.now();
   saveDocs();
   renderDocList();
+}
+
+function updateProfileToggleLabel() {
+  if (!els.showProfileLabel) return;
+  els.showProfileLabel.textContent = els.showProfile.checked ? "隐藏信息" : "显示信息";
 }
 
 function normalizeHandle(value) {
@@ -540,6 +552,7 @@ function normalizeImportedDoc(raw, fallbackTitle = "导入文档") {
     },
     images: raw.images && typeof raw.images === "object" ? raw.images : {},
     content: String(raw.content || ""),
+    showProfile: raw.showProfile !== false,
   };
   if (!doc.content.trim()) doc.content = defaultGuideContent();
   if (!doc.author) doc.author = defaultAuthor;
@@ -1477,6 +1490,14 @@ function styleFor(type, settings) {
   return { size: base, weight: 450, marginTop: 13, lineHeight: settings.lineHeight };
 }
 
+function showsProfile(doc) {
+  return doc?.showProfile !== false;
+}
+
+function contentTop(doc) {
+  return showsProfile(doc) ? 160 : 58;
+}
+
 function font(style, bold = false, italic = false) {
   const weight = bold ? 820 : style.weight;
   const family = style.mono ? 'Consolas, Menlo, "SFMono-Regular", monospace' : '"PingFang SC", "Microsoft YaHei", Arial, sans-serif';
@@ -1543,7 +1564,7 @@ async function buildPages(doc) {
   const blocks = parseBlocks(doc.content);
   const imageCache = {};
   const pages = [];
-  const top = 160;
+  const top = contentTop(doc);
   const bottom = CANVAS_HEIGHT - 66;
   const contentWidth = CANVAS_WIDTH - PAD_X * 2;
   let page = [];
@@ -1659,7 +1680,7 @@ async function buildLongDocument(doc) {
   const settings = doc.settings;
   const blocks = parseBlocks(doc.content);
   const imageCache = {};
-  const top = 160;
+  const top = contentTop(doc);
   const contentWidth = CANVAS_WIDTH - PAD_X * 2;
   const items = [];
   let y = top;
@@ -1847,11 +1868,11 @@ async function drawPage(items, index, total, doc) {
   canvas.height = CANVAS_HEIGHT;
   const ctx = canvas.getContext("2d");
   const settings = doc.settings;
-  const avatar = await loadImage(doc.avatar || sampleAvatar).catch(() => null);
+  const avatar = showsProfile(doc) ? await loadImage(doc.avatar || sampleAvatar).catch(() => null) : null;
 
   ctx.fillStyle = settings.bgColor;
   ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  drawHeader(ctx, doc, avatar);
+  if (showsProfile(doc)) drawHeader(ctx, doc, avatar);
 
   for (const item of items) {
     if (item.type === "text") drawText(ctx, item, settings);
@@ -1871,11 +1892,11 @@ async function drawLongCanvas(doc) {
   canvas.height = longDoc.height;
   const ctx = canvas.getContext("2d");
   const settings = doc.settings;
-  const avatar = await loadImage(doc.avatar || sampleAvatar).catch(() => null);
+  const avatar = showsProfile(doc) ? await loadImage(doc.avatar || sampleAvatar).catch(() => null) : null;
 
   ctx.fillStyle = settings.bgColor;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawHeader(ctx, doc, avatar);
+  if (showsProfile(doc)) drawHeader(ctx, doc, avatar);
 
   for (const item of longDoc.items) {
     if (item.type === "text") drawText(ctx, item, settings);
@@ -2574,7 +2595,7 @@ function bindEvents() {
     });
   });
 
-  [els.title, els.author, els.handle, els.textColor, els.accentColor, els.highlightColor, els.inlineColor, els.fontSize, els.lineHeight, els.content].forEach((input) => {
+  [els.title, els.author, els.handle, els.showProfile, els.textColor, els.accentColor, els.highlightColor, els.inlineColor, els.fontSize, els.lineHeight, els.content].forEach((input) => {
     input.addEventListener("input", () => {
       syncFormToDoc();
       scheduleHistory();
